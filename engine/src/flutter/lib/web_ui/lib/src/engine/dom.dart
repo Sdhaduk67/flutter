@@ -171,6 +171,9 @@ extension type DomConsole._(JSObject _) implements JSObject {
   void debug(Object? arg) => _debug(arg.toString());
 }
 
+@JS('parseFloat')
+external double parseFloatImpl(String value);
+
 @JS('window')
 external DomWindow get domWindow;
 
@@ -204,6 +207,8 @@ extension type DomNavigator._(JSObject _) implements JSObject {
   external String? get platform;
   external String get userAgent;
 
+  external bool vibrate(JSAny? pattern);
+
   @JS('languages')
   external JSArray<JSAny?>? get _languages;
   List<String>? get languages =>
@@ -230,7 +235,6 @@ extension type DomDocument._(JSObject _) implements DomNode {
     }
   }
 
-  external bool execCommand(String commandId);
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(String namespaceURI, String qualifiedName);
   external DomText createTextNode(String data);
@@ -468,6 +472,45 @@ extension type DomElement._(JSObject _) implements DomNode {
   external DomShadowRoot? get shadowRoot;
 
   external void setPointerCapture(num? pointerId);
+
+  /// The **`computedStyleMap()`** method of
+  /// the [Element] interface returns a [StylePropertyMapReadOnly]
+  /// interface which provides a read-only representation of a CSS declaration
+  /// block that is
+  /// an alternative to [CSSStyleDeclaration].
+  external StylePropertyMapReadOnly computedStyleMap();
+}
+
+/// The **`StylePropertyMapReadOnly`** interface of the
+/// [CSS Typed Object Model API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model#css_typed_object_model)
+/// provides a read-only representation of a CSS declaration block that is an
+/// alternative to [CSSStyleDeclaration]. Retrieve an instance of this interface
+/// using [Element.computedStyleMap].
+///
+/// ---
+///
+/// API documentation sourced from
+/// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/API/StylePropertyMapReadOnly).
+extension type StylePropertyMapReadOnly._(JSObject _) implements JSObject {
+  /// The **`get()`** method of the
+  /// [StylePropertyMapReadOnly] interface returns a [CSSStyleValue]
+  /// object for the first value of the specified property.
+  external JSObject? get(String property);
+
+  /// The **`getAll()`** method of the
+  /// `StylePropertyMapReadOnly` interface returns an array of
+  /// [CSSStyleValue] objects containing the values for the provided property.
+  external JSArray<JSObject> getAll(String property);
+
+  /// The **`has()`** method of the
+  /// [StylePropertyMapReadOnly] interface indicates whether the specified
+  /// property is in the `StylePropertyMapReadOnly` object.
+  external bool has(String property);
+
+  /// The **`size`** read-only property of the
+  /// [StylePropertyMapReadOnly] interface returns an unsigned long integer
+  /// containing the size of the `StylePropertyMapReadOnly` object.
+  external int get size;
 }
 
 DomElement createDomElement(String tag) => domDocument.createElement(tag);
@@ -1480,7 +1523,7 @@ extension type DomHTMLTextAreaElement._(JSObject _) implements DomHTMLElement {
   external double? get selectionEnd;
   external set selectionStart(double? value);
   external set selectionEnd(double? value);
-  external String? get value;
+  external String get value;
 
   @JS('setSelectionRange')
   external void _setSelectionRange(int start, int end, [String direction]);
@@ -1855,7 +1898,7 @@ extension type DomHTMLInputElement._(JSObject _) implements DomHTMLElement {
   external String? type;
   external set max(String? value);
   external set min(String value);
-  external String? value;
+  external String value;
   external bool? disabled;
   external String placeholder;
   external String? name;
@@ -2227,19 +2270,18 @@ final DomTrustedTypePolicy _ttPolicy = domWindow.trustedTypes!.createPolicy(
   'flutter-engine',
   DomTrustedTypePolicyOptions(
     // Validates the given [url].
-    createScriptURL:
-        (String url) {
-          final Uri uri = Uri.parse(url);
-          if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
-            return uri.toString().toJS;
-          }
-          domWindow.console.error(
-            'URL rejected by TrustedTypes policy flutter-engine: $url'
-            '(download prevented)',
-          );
+    createScriptURL: (String url) {
+      final Uri uri = Uri.parse(url);
+      if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
+        return uri.toString().toJS;
+      }
+      domWindow.console.error(
+        'URL rejected by TrustedTypes policy flutter-engine: $url'
+        '(download prevented)',
+      );
 
-          return null;
-        }.toJS,
+      return null;
+    }.toJS,
   ),
 );
 
@@ -2339,7 +2381,7 @@ extension type DomSegmenter._(JSObject _) implements JSObject {
 @JS('Segments')
 extension type DomSegments._(JSObject _) implements JSObject {
   DomIteratorWrapper<DomSegment> iterator() {
-    final DomIterator segmentIterator = callMethod(domSymbol.iterator)! as DomIterator;
+    final DomIterator segmentIterator = callMethod<DomIterator>(domSymbol.iterator);
     return DomIteratorWrapper<DomSegment>(segmentIterator);
   }
 }

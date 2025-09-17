@@ -41,7 +41,8 @@ class DatePickerTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends DatePickerThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
@@ -62,6 +63,14 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
 
   @override
   Color? get backgroundColor => ${componentColor("md.comp.date-picker.modal.container")};
+
+  @override
+  Color? get subHeaderForegroundColor => ${componentColor("md.comp.date-picker.modal.weekdays.label-text")}.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleButtonTextStyle => ${textStyle("md.comp.date-picker.modal.range-selection.month.subhead")}?.apply(
+    color: subHeaderForegroundColor,
+  );
 
   @override
   ButtonStyle get cancelButtonStyle {

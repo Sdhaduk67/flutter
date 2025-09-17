@@ -13,7 +13,11 @@ import 'package:flutter_tools/src/reporting/github_template.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+<<<<<<< HEAD
 const String _kPluginsFile = '''
+=======
+const _kPluginsFile = '''
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
 {
   "plugins": {
     "ios": [
@@ -113,7 +117,7 @@ void main() {
       });
 
       testWithoutContext('DevFSException', () {
-        final StackTrace stackTrace = StackTrace.fromString('''
+        final stackTrace = StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
         expect(
@@ -172,8 +176,8 @@ void main() {
     group('new issue template URL', () {
       late StackTrace stackTrace;
       late Error error;
-      const String command = 'flutter test';
-      const String doctorText = ' [✓] Flutter (Channel report';
+      const command = 'flutter test';
+      const doctorText = ' [✓] Flutter (Channel report';
 
       setUp(() async {
         stackTrace = StackTrace.fromString('trace');
@@ -183,7 +187,7 @@ void main() {
       testUsingContext(
         'shows GitHub issue URL',
         () async {
-          final GitHubTemplateCreator creator = GitHubTemplateCreator(
+          final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
             flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
@@ -208,7 +212,7 @@ void main() {
       testUsingContext(
         'app metadata',
         () async {
-          final GitHubTemplateCreator creator = GitHubTemplateCreator(
+          final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
             flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
@@ -245,7 +249,7 @@ project_type: app
             doctorText,
           );
           final String? actualBody = Uri.parse(actualURL).queryParameters['body'];
-          const String expectedBody = '''
+          const expectedBody = '''
 ## Command
 ```sh
 flutter test

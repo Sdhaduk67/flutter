@@ -14,36 +14,26 @@ import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-const List<String> firstLaunchMessages = <String>[
+final launchingOnDeviceRegExp = RegExp(r'Launching the Widget Preview Scaffold on [a-zA-Z]+...');
+
+final firstLaunchMessagesWeb = <Pattern>[
   'Creating widget preview scaffolding at:',
-  'Performing initial build of the Widget Preview Scaffold...',
-  'Widget Preview Scaffold initial build complete.',
-  'Launching the Widget Preview Scaffold...',
-  'Loading previews into the Widget Preview Scaffold...',
+  launchingOnDeviceRegExp,
   'Done loading previews.',
 ];
 
-const List<String> subsequentLaunchMessages = <String>[
-  'Launching the Widget Preview Scaffold...',
-  'Loading previews into the Widget Preview Scaffold...',
-  'Done loading previews.',
-];
-
-const List<String> firstLaunchMessagesWeb = <String>[
-  'Creating widget preview scaffolding at:',
-  'Launching the Widget Preview Scaffold...',
-  'Done loading previews.',
-];
-
-const List<String> subsequentLaunchMessagesWeb = <String>[
-  'Launching the Widget Preview Scaffold...',
-  'Done loading previews.',
-];
+final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
 
 void main() {
   late Directory tempDir;
   Process? process;
+<<<<<<< HEAD
   final BasicProject project = BasicProject();
+=======
+  Logger? logger;
+  DtdLauncher? dtdLauncher;
+  final project = BasicProject();
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
   const ProcessManager processManager = LocalProcessManager();
 
   setUp(() async {
@@ -57,24 +47,33 @@ void main() {
     tryToDelete(tempDir);
   });
 
+<<<<<<< HEAD
   Future<void> runWidgetPreview({
     required List<String> expectedMessages,
     bool useWeb = false,
   }) async {
+=======
+  Future<void> runWidgetPreview({required List<Pattern> expectedMessages, Uri? dtdUri}) async {
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
     expect(expectedMessages, isNotEmpty);
-    int i = 0;
+    var i = 0;
     process = await processManager.start(<String>[
       flutterBin,
       'widget-preview',
       'start',
       '--verbose',
+<<<<<<< HEAD
       if (useWeb)
         '--${WidgetPreviewStartCommand.kHeadlessWeb}'
       else
         '--${WidgetPreviewStartCommand.kUseFlutterDesktop}',
+=======
+      '--${WidgetPreviewStartCommand.kHeadless}',
+      if (dtdUri != null) '--${FlutterGlobalOptions.kDtdUrl}=$dtdUri',
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
     ], workingDirectory: tempDir.path);
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
       printOnFailure('STDOUT: $msg');
       if (completer.isCompleted) {
@@ -109,28 +108,47 @@ void main() {
 
   group('flutter widget-preview start', () {
     testWithoutContext('smoke test', () async {
-      await runWidgetPreview(expectedMessages: firstLaunchMessages);
+      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
     });
 
-    testWithoutContext('web smoke test', () async {
-      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, useWeb: true);
-    });
-
-    testWithoutContext('does not rebuild project on subsequent runs', () async {
-      // The first run of 'flutter widget-preview start' should generate a new preview scaffold and
-      // pre-build the application.
-      await runWidgetPreview(expectedMessages: firstLaunchMessages);
+    testWithoutContext('does not recreate project on subsequent runs', () async {
+      // The first run of 'flutter widget-preview start' should generate a new preview scaffold
+      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
 
       // We shouldn't regenerate the scaffold after the initial run.
-      await runWidgetPreview(expectedMessages: subsequentLaunchMessages);
+      await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
     });
+<<<<<<< HEAD
+=======
 
-    testWithoutContext('does not recreate project on subsequent --web runs', () async {
-      // The first run of 'flutter widget-preview start --web' should generate a new preview scaffold
-      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, useWeb: true);
+    testUsingContext('can connect to an existing DTD instance', () async {
+      dtdLauncher = DtdLauncher(
+        logger: logger!,
+        artifacts: globals.artifacts!,
+        processManager: globals.processManager,
+      );
 
-      // We shouldn't regenerate the scaffold after the initial run.
-      await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb, useWeb: true);
+      // Start a DTD instance.
+      final Uri dtdUri = await dtdLauncher!.launch();
+
+      // Connect to it and listen to the WidgetPreviewScaffold stream.
+      //
+      // The preview scaffold will send a 'Connected' event on this stream once it has initialized
+      // and is ready.
+      final DartToolingDaemon dtdConnection = await DartToolingDaemon.connect(dtdUri);
+      const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
+      final completer = Completer<void>();
+      dtdConnection.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
+        expect(event.stream, kWidgetPreviewScaffoldStream);
+        expect(event.kind, 'Connected');
+        completer.complete();
+      });
+      await dtdConnection.streamListen(kWidgetPreviewScaffoldStream);
+
+      // Start the widget preview and wait for the 'Connected' event.
+      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
+      await completer.future;
     });
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
   });
 }

@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
-import 'package:file/local.dart';
-import 'package:flutter_devicelab/framework/dependency_smoke_test_task_definition.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 
+<<<<<<< HEAD
 // Methodology:
 // - AGP: all versions within our support range (*).
 // - Gradle: The version that AGP lists as the default Gradle version for that
@@ -56,18 +54,11 @@ List<VersionTuple> versionTuples = <VersionTuple>[
 // CI before 17, and hence it is also hosted on CIPD. It also overrides to
 // compileSdkVersion 34 because compileSdk 35 requires AGP 8.0+.
 // https://docs.gradle.org/current/userguide/compatibility.html
+=======
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
 Future<void> main() async {
-  /// The [FileSystem] for the integration test environment.
-  const LocalFileSystem fileSystem = LocalFileSystem();
-
-  final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
-    'flutter_android_dependency_version_tests',
-  );
-  await task(() {
-    return buildFlutterApkWithSpecifiedDependencyVersions(
-      versionTuples: versionTuples,
-      tempDir: tempDir,
-      localFileSystem: fileSystem,
-    );
+  // Empty so that version minimum can land before removal of java 11 tests ci config.
+  await task(() async {
+    return TaskResult.success(null);
   });
 }

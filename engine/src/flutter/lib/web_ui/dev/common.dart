@@ -258,6 +258,31 @@ final String gitRevision = () {
   return (result.stdout as String).trim();
 }();
 
+final String contentHash = () {
+  final String executable;
+  final List<String> args;
+  if (io.Platform.isWindows) {
+    executable = 'powershell';
+    args = <String>[path.join('bin', 'internal', 'content_aware_hash.ps1')];
+  } else {
+    executable = path.join('bin', 'internal', 'content_aware_hash.sh');
+    args = <String>[];
+  }
+  final result = io.Process.runSync(
+    executable,
+    args,
+    workingDirectory: environment.flutterRootDir.path,
+    stderrEncoding: utf8,
+    stdoutEncoding: utf8,
+  );
+  if (result.exitCode != 0) {
+    throw ToolExit(
+      'Failed to get content hash. Exit code: ${result.exitCode} Error: ${result.stderr}',
+    );
+  }
+  return (result.stdout as String).trim();
+}();
+
 const String kChrome = 'chrome';
 const String kEdge = 'edge';
 const String kFirefox = 'firefox';
@@ -268,9 +293,13 @@ const List<String> kAllBrowserNames = <String>[kChrome, kEdge, kFirefox, kSafari
 /// Creates an environment for a browser.
 ///
 /// The [browserName] matches the browser name passed as the `--browser` option.
-BrowserEnvironment getBrowserEnvironment(BrowserName browserName, {required bool useDwarf}) {
+BrowserEnvironment getBrowserEnvironment(
+  BrowserName browserName, {
+  required bool useDwarf,
+  required List<String> browserFlags,
+}) {
   return switch (browserName) {
-    BrowserName.chrome => ChromeEnvironment(useDwarf: useDwarf),
+    BrowserName.chrome => ChromeEnvironment(useDwarf: useDwarf, flags: browserFlags),
     BrowserName.edge => EdgeEnvironment(),
     BrowserName.firefox => FirefoxEnvironment(),
     BrowserName.safari => SafariMacOsEnvironment(),

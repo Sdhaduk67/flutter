@@ -16,15 +16,9 @@ G_DECLARE_DERIVABLE_TYPE(FlCompositor, fl_compositor, FL, COMPOSITOR, GObject)
 struct _FlCompositorClass {
   GObjectClass parent_class;
 
-  gboolean (*create_backing_store)(FlCompositor* compositor,
-                                   const FlutterBackingStoreConfig* config,
-                                   FlutterBackingStore* backing_store_out);
-
-  gboolean (*collect_backing_store)(FlCompositor* compositor,
-                                    const FlutterBackingStore* backing_store);
+  FlutterRendererType (*get_renderer_type)(FlCompositor* compositor);
 
   gboolean (*present_layers)(FlCompositor* compositor,
-                             FlutterViewId view_id,
                              const FlutterLayer** layers,
                              size_t layers_count);
 
@@ -40,38 +34,18 @@ struct _FlCompositorClass {
  */
 
 /**
- * fl_compositor_create_backing_store:
+ * fl_compositor_get_renderer_type:
  * @compositor: an #FlCompositor.
- * @config: backing store config.
- * @backing_store_out: saves created backing store.
  *
- * Obtain a backing store for a specific #FlutterLayer.
+ * Gets the rendering method this compositor uses.
  *
- * Returns %TRUE if successful.
+ * Returns: a FlutterRendererType.
  */
-gboolean fl_compositor_create_backing_store(
-    FlCompositor* compositor,
-    const FlutterBackingStoreConfig* config,
-    FlutterBackingStore* backing_store_out);
-
-/**
- * fl_compositor_collect_backing_store:
- * @compositor: an #FlCompositor.
- * @backing_store: backing store to be released.
- *
- * A callback invoked by the engine to release the backing store. The
- * embedder may collect any resources associated with the backing store.
- *
- * Returns %TRUE if successful.
- */
-gboolean fl_compositor_collect_backing_store(
-    FlCompositor* compositor,
-    const FlutterBackingStore* backing_store);
+FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* compositor);
 
 /**
  * fl_compositor_present_layers:
  * @compositor: an #FlCompositor.
- * @view_id: view to present.
  * @layers: layers to be composited.
  * @layers_count: number of layers.
  *
@@ -81,7 +55,6 @@ gboolean fl_compositor_collect_backing_store(
  * Returns %TRUE if successful.
  */
 gboolean fl_compositor_present_layers(FlCompositor* compositor,
-                                      FlutterViewId view_id,
                                       const FlutterLayer** layers,
                                       size_t layers_count);
 

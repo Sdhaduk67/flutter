@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
 class _WidgetPreviewIconButton extends StatelessWidget {
   const _WidgetPreviewIconButton({
@@ -65,7 +66,7 @@ class ZoomControls extends StatelessWidget {
         _WidgetPreviewIconButton(
           tooltip: 'Reset zoom',
           onPressed: enabled ? _reset : null,
-          icon: Icons.refresh,
+          icon: Icons.zoom_out_map,
         ),
       ],
     );
@@ -74,13 +75,13 @@ class ZoomControls extends StatelessWidget {
   void _zoomIn() {
     _transformationController.value = Matrix4.copy(
       _transformationController.value,
-    ).scaled(1.1);
+    ).scaledByDouble(1.1, 1.1, 1.1, 1);
   }
 
   void _zoomOut() {
     final Matrix4 updated = Matrix4.copy(
       _transformationController.value,
-    ).scaled(0.9);
+    ).scaledByDouble(0.9, 0.9, 0.9, 1);
 
     // Don't allow for zooming out past the original size of the widget.
     // Assumes scaling is evenly applied to the entire matrix.
@@ -93,5 +94,87 @@ class ZoomControls extends StatelessWidget {
 
   void _reset() {
     _transformationController.value = Matrix4.identity();
+  }
+}
+
+/// A button that triggers a "soft" restart of a previewed widget.
+///
+/// A soft restart removes the previewed widget from the widget tree for a frame before
+/// re-inserting it on the next frame. This has the effect of re-running local initializers in
+/// State objects, which normally requires a hot restart to accomplish in a normal application.
+class SoftRestartButton extends StatelessWidget {
+  const SoftRestartButton({
+    super.key,
+    required this.enabled,
+    required this.softRestartListenable,
+  });
+
+  final ValueNotifier<bool> softRestartListenable;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return _WidgetPreviewIconButton(
+      tooltip: 'Hot restart',
+      onPressed: enabled ? _onRestart : null,
+      icon: Icons.refresh,
+    );
+  }
+
+  void _onRestart() {
+    softRestartListenable.value = true;
+  }
+}
+
+/// A button that triggers a restart of the widget previewer through a hot restart request made
+/// through DTD.
+class WidgetPreviewerRestartButton extends StatelessWidget {
+  const WidgetPreviewerRestartButton({super.key, required this.dtdServices});
+
+  final WidgetPreviewScaffoldDtdServices dtdServices;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton.outlined(
+      tooltip: 'Restart the Widget Previewer',
+      onPressed: () => dtdServices.hotRestartPreviewer(),
+      icon: Icon(Icons.restart_alt),
+    );
+  }
+}
+
+extension on Brightness {
+  Brightness get invert => isLight ? Brightness.dark : Brightness.light;
+  bool get isLight => this == Brightness.light;
+}
+
+/// A button that toggles the current theme brightness.
+class BrightnessToggleButton extends StatelessWidget {
+  const BrightnessToggleButton({
+    super.key,
+    required this.enabled,
+    required this.brightnessListenable,
+  });
+
+  final ValueNotifier<Brightness> brightnessListenable;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Brightness>(
+      valueListenable: brightnessListenable,
+      builder: (context, brightness, _) {
+        final brightness = brightnessListenable.value;
+        return _WidgetPreviewIconButton(
+          tooltip: 'Switch to ${brightness.isLight ? 'dark' : 'light'} mode',
+          onPressed: enabled ? _toggleBrightness : null,
+          icon: brightness.isLight ? Icons.dark_mode : Icons.light_mode,
+        );
+      },
+    );
+  }
+
+  void _toggleBrightness() {
+    brightnessListenable.value = brightnessListenable.value.invert;
   }
 }

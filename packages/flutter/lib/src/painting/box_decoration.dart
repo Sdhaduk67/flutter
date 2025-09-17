@@ -133,6 +133,7 @@ class BoxDecoration extends Decoration {
   bool debugAssertIsValid() {
     assert(
       shape != BoxShape.circle || borderRadius == null,
+      'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
     ); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
@@ -428,7 +429,10 @@ class _BoxDecorationPainter extends BoxPainter {
   void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection? textDirection) {
     switch (_decoration.shape) {
       case BoxShape.circle:
-        assert(_decoration.borderRadius == null);
+        assert(
+          _decoration.borderRadius == null,
+          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
+        );
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
@@ -537,17 +541,20 @@ class _BoxDecorationPainter extends BoxPainter {
     Path? clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
-        assert(_decoration.borderRadius == null);
+        assert(
+          _decoration.borderRadius == null,
+          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
+        );
         final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
         final Rect square = Rect.fromCircle(center: center, radius: radius);
         clipPath = Path()..addOval(square);
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null) {
-          clipPath =
-              Path()..addRRect(
-                _decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect),
-              );
+          clipPath = Path()
+            ..addRRect(
+              _decoration.borderRadius!.resolve(configuration.textDirection).toRRect(rect),
+            );
         }
     }
     _imagePainter!.paint(canvas, rect, clipPath, configuration);

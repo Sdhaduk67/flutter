@@ -43,8 +43,9 @@ String placeholderMessage = 'Enable accessibility';
 ///
 /// See [DesktopSemanticsEnabler], [MobileSemanticsEnabler].
 class SemanticsHelper {
-  SemanticsEnabler _semanticsEnabler =
-      ui_web.browser.isDesktop ? DesktopSemanticsEnabler() : MobileSemanticsEnabler();
+  SemanticsEnabler _semanticsEnabler = ui_web.browser.isDesktop
+      ? DesktopSemanticsEnabler()
+      : MobileSemanticsEnabler();
 
   @visibleForTesting
   set semanticsEnabler(SemanticsEnabler semanticsEnabler) {
@@ -79,6 +80,15 @@ abstract class SemanticsEnabler {
   /// Or if the received [DomEvent] is suitable/enough for enabling the
   /// semantics. See [tryEnableSemantics].
   bool shouldEnableSemantics(DomEvent event) {
+    // Simply tabbing into the placeholder element should not cause semantics
+    // to be enabled. The user should actually click on the placeholder.
+    if (event.isA<DomKeyboardEvent>()) {
+      event as DomKeyboardEvent;
+      if (event.key == 'Tab') {
+        return true;
+      }
+    }
+
     if (!isWaitingToEnableSemantics) {
       // Forward to framework as normal.
       return true;
@@ -175,8 +185,9 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
 
   @override
   DomElement prepareAccessibilityPlaceholder() {
-    final DomElement placeholder =
-        _semanticsPlaceholder = createDomElement('flt-semantics-placeholder');
+    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
+      'flt-semantics-placeholder',
+    );
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
@@ -373,8 +384,9 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
   @override
   DomElement prepareAccessibilityPlaceholder() {
-    final DomElement placeholder =
-        _semanticsPlaceholder = createDomElement('flt-semantics-placeholder');
+    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
+      'flt-semantics-placeholder',
+    );
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.

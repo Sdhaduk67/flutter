@@ -287,6 +287,12 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
   }
 
   @override
+  double childCrossAxisPosition(covariant RenderObject child) {
+    final TreeSliverNodeParentData parentData = child.parentData! as TreeSliverNodeParentData;
+    return parentData.depth * indentation;
+  }
+
+  @override
   double indexToLayoutOffset(double itemExtent, int index) {
     // itemExtent is deprecated in the super class, we ignore it because we use
     // the builder anyways.
@@ -333,8 +339,16 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
         final double mainAxisDelta = childMainAxisPosition(child);
         final TreeSliverNodeParentData parentData = child.parentData! as TreeSliverNodeParentData;
         final Offset childOffset =
+<<<<<<< HEAD
             Offset(parentData.depth * indentation, parentData.layoutOffset!) + offset;
 
+=======
+            Offset(
+              parentData.depth * indentation,
+              parentData.layoutOffset! - constraints.scrollOffset,
+            ) +
+            offset;
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
         // If the child's visible interval (mainAxisDelta, mainAxisDelta + paintExtentOf(child))
         // does not intersect the paint extent interval (0, constraints.remainingPaintExtent), it's hidden.
         if (mainAxisDelta < constraints.remainingPaintExtent &&

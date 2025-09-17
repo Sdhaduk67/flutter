@@ -38,13 +38,21 @@ void main() {
 
 final class _DefaultFlavorProject extends Project {
   @override
+<<<<<<< HEAD
   final String main = r'''
+=======
+  final main = r'''
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
     // Irrelevant to this test.
     void main() {}
   ''';
 
   @override
+<<<<<<< HEAD
   final String pubspec = r'''
+=======
+  final pubspec = r'''
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -61,7 +69,11 @@ final class _DefaultFlavorProject extends Project {
   ''';
 
   @override
+<<<<<<< HEAD
   final String test = r'''
+=======
+  final test = r'''
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
     import 'package:flutter/services.dart';
     import 'package:flutter_test/flutter_test.dart';
 

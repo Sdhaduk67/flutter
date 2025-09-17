@@ -24,6 +24,7 @@ import '../web/web_device.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
+<<<<<<< HEAD
   static const String kColorFlag = 'color';
   static const String kContinuousIntegrationFlag = 'ci';
   static const String kDeviceIdOption = 'device-id';
@@ -47,6 +48,32 @@ abstract final class FlutterGlobalOptions {
   static const String kWrapColumnOption = 'wrap-column';
   static const String kWrapFlag = 'wrap';
   static const String kDebugLogsDirectoryFlag = 'debug-logs-dir';
+=======
+  static const kColorFlag = 'color';
+  static const kContinuousIntegrationFlag = 'ci';
+  static const kDeviceIdOption = 'device-id';
+  static const kDisableAnalyticsFlag = 'disable-analytics';
+  static const kEnableAnalyticsFlag = 'enable-analytics';
+  static const kLocalEngineOption = 'local-engine';
+  static const kLocalEngineSrcPathOption = 'local-engine-src-path';
+  static const kLocalEngineHostOption = 'local-engine-host';
+  static const kLocalWebSDKOption = 'local-web-sdk';
+  static const kMachineFlag = 'machine';
+  static const kPackagesOption = 'packages';
+  static const kPrefixedErrorsFlag = 'prefixed-errors';
+  static const kDtdUrl = 'dtd-url';
+  static const kPrintDtd = 'print-dtd';
+  static const kQuietFlag = 'quiet';
+  static const kShowTestDeviceFlag = 'show-test-device';
+  static const kShowWebServerDeviceFlag = 'show-web-server-device';
+  static const kSuppressAnalyticsFlag = 'suppress-analytics';
+  static const kVerboseFlag = 'verbose';
+  static const kVersionCheckFlag = 'version-check';
+  static const kVersionFlag = 'version';
+  static const kWrapColumnOption = 'wrap-column';
+  static const kWrapFlag = 'wrap';
+  static const kDebugLogsDirectoryFlag = 'debug-logs-dir';
+>>>>>>> d693b4b9dbac2acd4477aea4555ca6dcbea44ba2
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -232,10 +259,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = ArgParser(
+  final _argParser = ArgParser(
     allowTrailingOptions: false,
-    usageLineLength:
-        globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
+    usageLineLength: globals.outputPreferences.wrapText
+        ? globals.outputPreferences.wrapColumn
+        : null,
   );
 
   @override
@@ -358,7 +386,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Map<Type, Object?> contextOverrides = <Type, Object?>{};
+    final contextOverrides = <Type, Object?>{};
 
     // If the flag for enabling or disabling telemetry is passed in,
     // we will return out
@@ -392,11 +420,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // If we're not writing to a terminal with a defined width, then don't wrap
     // anything, unless the user explicitly said to.
-    final bool useWrapping =
-        topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
-            ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
-            : globals.stdio.terminalColumns != null &&
-                topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
+    final bool useWrapping = topLevelResults.wasParsed(FlutterGlobalOptions.kWrapFlag)
+        ? topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool
+        : globals.stdio.terminalColumns != null &&
+              topLevelResults[FlutterGlobalOptions.kWrapFlag] as bool;
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
       showColor: topLevelResults[FlutterGlobalOptions.kColorFlag] as bool?,
@@ -443,6 +470,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.analytics.suppressTelemetry();
         }
 
+        // Required to support `flutter --version` before artifacts are cached.
+        await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
+
         globals.flutterVersion.ensureVersionFile();
         final bool machineFlag =
             topLevelResults[FlutterGlobalOptions.kMachineFlag] as bool? ?? false;
@@ -451,8 +481,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        final String? specifiedDeviceId =
-            topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
+        final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
           globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }
@@ -518,15 +547,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
       return <String>[];
     }
 
-    final List<String> projectPaths =
-        globals.fs.directory(rootPath).listSync(followLinks: false).expand((
-          FileSystemEntity entity,
-        ) {
+    final List<String> projectPaths = globals.fs
+        .directory(rootPath)
+        .listSync(followLinks: false)
+        .expand((FileSystemEntity entity) {
           if (entity is Directory && !globals.fs.path.split(entity.path).contains('.dart_tool')) {
             return _gatherProjectPaths(entity.path);
           }
           return <String>[];
-        }).toList();
+        })
+        .toList();
 
     if (globals.fs.isFileSync(globals.fs.path.join(rootPath, 'pubspec.yaml'))) {
       projectPaths.add(rootPath);
